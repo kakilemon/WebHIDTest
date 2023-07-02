@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using AOT;
+using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using System.Linq;
@@ -13,21 +15,27 @@ public class Test : MonoBehaviour
     DebugInfo debug;
     [SerializeField]
     Vector3 accel, gyro;
-    bool standardMode = true;
-
-    [DllImport("__Internal")]
-    private static extern void MyTestFunction();
-    [DllImport("__Internal")]
-    private static extern void RequestDevice();
-    [DllImport("__Internal")]
-    private static extern void SendCommand(uint subCommand, uint subCommandArguments);
+    [SerializeField]
+    Transform obj;
 
     // Start is called before the first frame update
     private void Update()
     {
+        string log = "";
+        log += HIDManager.AvailabilityState.ToString();
+        if (HIDManager.IsConnectionActive)
+        {
+            log += $"\nProduct: {HIDManager.ProductName}";
+            log += $"\nAccel: {HIDManager.Accel}";
+            log += $"\nGyro: {HIDManager.Gyro}";
+            float angle = 90 - Mathf.Atan2(-HIDManager.Accel.y, -HIDManager.Accel.x) * Mathf.Rad2Deg;
+            log += $"\nAngle: {angle}";
+        }
+        debug.Log(log);
+
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            RequestDevice();
+            HIDManager.CallRequestDevice();
         }
     }
 
